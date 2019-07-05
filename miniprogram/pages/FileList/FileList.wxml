@@ -1,0 +1,20 @@
+<!--pages/testFileList/testFileList.wxml-->
+<view class="container">
+
+  <view class="list">
+    <button bindtap='uploadWx' size="default" class='uploadImage'>上传图片</button>
+    <text class="photos_number">{{photosNumber}}</text>
+    <!-- <block wx:if={{fileSrc}}> -->
+      <view wx:for="{{fileOpt}}" wx:for-index="index" wx:for-item="item" class="image_list">
+        <image src="{{item.tempFileURL}}" mode="aspectFit" class="image_list" data-src='{{item.tempFileURL}}' bindtap="previewImage"></image>
+        <text class="delete_image" wx:if='{{deleteState}}' bindtap="deleteImage" data-fileid="{{item.fileID}}">删除</text>
+        <!-- <text class="downloadImage" bindtap="doDownload" data-fileid="{{item.fileID}}">下载</text> -->
+        <!-- <button class="downloadImage" bindtap="doDownload" data-fileid="{{item.fileID}}">下载</button> -->
+        <!-- <view class="downloadImage" bindtap="doDownload" data-fileid="{{item.fileID}}">下载</view> -->
+      </view>
+    <!-- </block> -->
+  </view>
+
+  <image src="../../images/return-top.png" class="posi_img" bindtap="returnTop" wx:if="{{topStatus}}"></image>
+
+</view>

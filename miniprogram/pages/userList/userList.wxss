@@ -1,0 +1,18 @@
+/* miniprogram/pages/userList/userList.wxss */
+
+@import "../../style/guide.wxss";
+
+.add_recode{
+  position: fixed;
+  right: 32rpx;
+  bottom: 200rpx;
+  width: 55rpx;
+  height: 55rpx;
+}
+.list-item{
+  position: relative;
+}
+.deleteCurrent{
+  position: absolute;
+  right: 0;
+}

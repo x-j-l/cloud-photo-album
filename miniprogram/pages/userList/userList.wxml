@@ -1,0 +1,21 @@
+<!--miniprogram/pages/userList/userList.wxml-->
+<!--pages/addFunction/addFunction.wxml-->
+<view class="container">
+
+  <view class="list">
+     <view class="list-item" wx:for="{{recodeListOpt}}" wx:for-item="item" wx:for-index="index">
+      <navigator url="../FileList/FileList?id={{item._id}}&deleteOp={{deleteOp}}" open-type="navigate" class="uploader-text">
+        <text>{{item.name}}</text>
+      </navigator>
+      <text class="deleteCurrent" bindtap="deleteCurrent" wx:if='{{deleteOp}}' data-id="{{item._id}}">删除</text>
+    </view>
+
+  </view>
+
+  <modal title='添加分类' confirm-text='确定' cancel-text='取消' bindconfirm='confirmClassify' bindcancel='cancelClassify' hidden='{{hiddenModal}}'>
+    <input placeholder="请输入添加分类名" bindinput="classifyName" value="{{classifyName}}"></input>
+  </modal>
+
+  <image src="../../images/add-recode.png" class="add_recode" bindtap="addRecode"></image>
+
+</view>
