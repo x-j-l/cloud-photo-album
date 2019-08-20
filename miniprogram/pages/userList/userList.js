@@ -15,8 +15,10 @@ Page({
     password: '',
     hiddenModal: true,
     classifyName: '',
-    deleteOp: false,
-    recodeCurrent: ''
+    deleteOp: true,
+    showUploadInfo: false,
+    recodeCurrent: '',
+    getUserInfo: {}
   },
 
   /**
@@ -27,6 +29,29 @@ Page({
       currentAccountOpt: JSON.parse(options.currentAccountOpt)
     })
     this.classify()
+
+    // 获取授权列表
+    wx.getSetting({
+      success (res) {
+        console.log(res)
+      },
+      fail (err) {
+        console.log(err)
+      }
+    })
+
+    // 获取用户信息
+    let that = this
+    wx.getUserInfo({
+      success (res) {
+        that.setData({
+          getUserInfo: res.userInfo
+        })
+      },
+      fail (err) {
+        console.log(err)
+      }
+    })
   },
 
   /**
@@ -151,7 +176,7 @@ Page({
     //判断是否有删除管理员权限 0为有 1为无
     if (JSON.parse(that.data.currentAccountOpt.deleteOp == '0')) {
       that.setData({
-        deleteOp: true
+        showUploadInfo: true
       })
       const db = wx.cloud.database()
       db.collection('x-j-l').field({
@@ -185,7 +210,8 @@ Page({
       }).catch(e => {
         console.log(e)
       })
-    } else {
+    } 
+    else {
       const db = wx.cloud.database()
       let recodeListOpt = []
       that.data.currentAccountOpt.recodeList.forEach((v, i) => {
@@ -246,17 +272,17 @@ Page({
     })
 
     //删除存储fileID列
-    db.collection('x-j-l').doc(e.currentTarget.dataset.id).get().then(res => {
-      wx.cloud.deleteFile({
-        fileList: res.data.fileIDList
-      }).then(r => {
-        console.log(r)
-      }).catch(e => {
-        console.log(e)
-      })
-    }).catch(err => {
-      console.log(err)
-    })
+    // db.collection('x-j-l').doc(e.currentTarget.dataset.id).get().then(res => {
+    //   wx.cloud.deleteFile({
+    //     fileList: res.data.fileIDList
+    //   }).then(r => {
+    //     console.log(r)
+    //   }).catch(e => {
+    //     console.log(e)
+    //   })
+    // }).catch(err => {
+    //   console.log(err)
+    // })
   }
 
 })

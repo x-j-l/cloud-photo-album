@@ -157,7 +157,7 @@ page {
 .section_submit{
   padding: 32rpx;
 }
-.album_submit,.visitor_submit{
+.album_submit,.visitor_submit,.visitor_register{
   background: #07C160;
   color: #fff;
   border-radius: 50px;
@@ -165,6 +165,9 @@ page {
 }
 .visitor_submit{
   background: #6E7CF1;
+}
+.visitor_register{
+  background: #007aff;
 }
 .surnames{
   color: #ddd;

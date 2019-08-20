@@ -6,17 +6,20 @@ Page({
     userId: '',
     topStatus: false,
     photosNumber: '',
-    deleteState: false,
-    fileIDList: []
+    deleteState: true,
+    showUploadInfo: false,
+    fileIDList: [],
+    fileID: '',
+    openid: '',
+    uploadTime: ''
   },
   onLoad: function (options) {
     this.setData({
       userId: options.id
     })
-    console.log(options.deleteOp)
-    if (options.deleteOp == 'true') {
+    if (options.showUploadInfo == 'true') {
       this.setData({
-        deleteState: true
+        showUploadInfo: true
       })
     }
     this.doGetFile()
@@ -31,20 +34,24 @@ Page({
     })
       .get()
       .then(res => {
+        res.data.fileIDList.reverse()
         that.setData({
           photosNumber: res.data.fileIDList.length + ' 张照片',
           fileIDList: res.data.fileIDList
         })
-        res.data.fileIDList.reverse()
         wx.cloud.getTempFileURL({
           fileList: res.data.fileIDList,
-          success(res) {
+          success(r) {
+            r.fileList.forEach((val, ind) => {
+              r.fileList[ind].openid = res.data.fileIDList[ind].openid
+              r.fileList[ind].uploadTime = res.data.fileIDList[ind].uploadTime
+            })
             that.setData({
-              fileOpt: res.fileList
+              fileOpt: r.fileList
             })
           },
-          fail(err) {
-            console.log(err)
+          fail(e) {
+            console.log(e)
           }
         })
       })
@@ -79,7 +86,7 @@ Page({
   uploadWx() {
     let that = this
     wx.chooseImage({
-      count: 1,
+      // count: 9,
       sizeType: ['original', 'compressed'],
       sourceType: ['album', 'camera'],
       success(res) {
@@ -87,42 +94,81 @@ Page({
           title: '上传中'
         })
         // let timestamp = (new Date()).valueOf()
-        let timestamp = new Date().getTime()
-        let filePath = res.tempFilePaths[0]
-        let currentId = that.data.userId
-        let cloudPath = currentId +'/image-' + timestamp + filePath.match(/\.[^.]+?$/)[0]
-        wx.cloud.uploadFile({
-          cloudPath,
-          filePath,
-          success(res) {
-            // console.log('[上传文件] 成功：', res)
-            wx.showToast({
-              title: '上传成功',
-              icon: 'success',
-              duration: 1000
-            })
-            const db = wx.cloud.database()
-            const _ = db.command
-            // let filesEnd = _.push([res.fileID])
-            // console.log(filesEnd)
-            // 调用云函数
-            wx.cloud.callFunction({
-              name: 'updateimagelist',
-              data: {
-                recode: that.data.userId,
-                fileIDList: res.fileID
-              },
-              success: res => {
-                that.doGetFile()
-              },
-              fail: err => {
-                console.error('失败', err)
-              }
-            })
-          },
-          fail(err) {
-            console.log(err)
-          }
+        res.tempFilePaths.forEach((v, i) => {
+          let timestamp = new Date().getTime()
+          let filePath = v
+          let currentId = that.data.userId
+          let cloudPath = currentId + '/image-' + timestamp + filePath.match(/\.[^.]+?$/)[0]
+          wx.cloud.uploadFile({
+            cloudPath,
+            filePath,
+            success(res) {
+              // console.log('[上传文件] 成功：', res)
+              wx.showToast({
+                title: '上传成功',
+                icon: 'success',
+                duration: 1000
+              })
+              // let filesEnd = _.push([res.fileID])
+              // console.log(filesEnd)
+              // 调用云函数
+              wx.cloud.callFunction({
+                name: 'getuploadinfo'
+              }).then(r => {
+                let date = new Date()
+                let year = date.getFullYear()
+                let month = date.getMonth() + 1
+                let day = date.getDate()
+                let hh = date.getHours()
+                let mm = date.getMinutes()
+                let ss = date.getSeconds()
+                let time = date.toLocaleString('chinese', { hour12: false })
+                if (month < 10) {
+                  month = '0' + month
+                }
+                if (day < 10) {
+                  day = '0' + day
+                }
+                if (hh < 10) {
+                  hh = '0' + hh
+                }
+                if (mm < 10) {
+                  mm = '0' + mm
+                }
+                if (ss < 10) {
+                  ss = '0' + ss
+                }
+                let dateTime = year + '-' + month + '-' + day + ' ' + hh + ':' + mm + ':' + ss
+                that.setData({
+                  fileID: res.fileID,
+                  openid: r.result.openid,
+                  uploadTime: dateTime
+                })
+                wx.cloud.callFunction({
+                  name: 'updateimagelist',
+                  data: {
+                    recode: that.data.userId,
+                    // fileIDList: res.fileID,
+                    fileID: that.data.fileID,
+                    openid: that.data.openid,
+                    uploadTime: that.data.uploadTime
+                  },
+                  success: res => {
+                    console.log(res)
+                    that.doGetFile()
+                  },
+                  fail: err => {
+                    console.error('失败', err)
+                  }
+                })
+              }).catch(err => {
+                console.log(err)
+              })
+            },
+            fail(err) {
+              console.log(err)
+            }
+          })
         })
       }
     })
@@ -151,7 +197,7 @@ Page({
       success (res) {
         if (res.confirm) {
           that.data.fileIDList.forEach((v, i) => {
-            if (that.data.fileIDList[i] == e.target.dataset.fileid) {
+            if (that.data.fileIDList[i].fileID == e.target.dataset.fileid) {
               that.data.fileIDList.splice(i, 1)
             }
           })
@@ -159,7 +205,7 @@ Page({
             name: 'admindeleteimagelist',
             data: {
               recode: that.data.userId,
-              fileIDList: that.data.fileIDList
+              fileIDList: that.data.fileIDList.reverse()
             }
           }).then(res => {
             wx.showToast({
@@ -173,13 +219,13 @@ Page({
           })
 
           //删除存储fileID列
-          wx.cloud.deleteFile({
-            fileList: [e.target.dataset.fileid]
-          }).then(r => {
-            console.log(r)
-          }).catch(e => {
-            console.log(e)
-          })
+          // wx.cloud.deleteFile({
+          //   fileList: [e.target.dataset.fileid]
+          // }).then(r => {
+          //   console.log(r)
+          // }).catch(e => {
+          //   console.log(e)
+          // })
         } else if (res.cancel) {
           console.log('用户点击取消')
         }
@@ -213,6 +259,13 @@ Page({
         content: '当前微信版本过低，无法使用该功能，请升级到最新微信版本后重试。',
       })
     }
+  },
+
+  // 按时间先后排序
+  sortTime () {
+    this.setData({
+      fileOpt: this.data.fileOpt.reverse()
+    })
   }
 
 })

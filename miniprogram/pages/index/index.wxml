@@ -73,10 +73,17 @@
       <input password name='password' placeholder="请输入密码" class="section_password" bindinput="getPassword"></input>
     </view>
     <view class="section_submit">
+      <!-- <button form-type="submit" class="album_submit" bindtap="admin_submit" open-type="{{openType}}">登录</button> -->
       <button form-type="submit" class="album_submit" bindtap="admin_submit">登录</button>
       <button form-type="submit" class="visitor_submit" bindtap="visitor_submit">访客登录</button>
+      <button form-type="submit" class="visitor_register" bindtap="visitor_register">注册</button>
+      <!-- <button bindtap="openSetting">打开设置页</button> -->
     </view>
   </form>
+  <modal title='注册' confirm-text='确定' cancel-text='取消' bindconfirm='confirmAccount' bindcancel='cancelAccount' hidden='{{hiddenModal}}'>
+    <input placeholder="请输入用户名" bindinput="accountName" value="{{accountName}}"></input>
+    <input password placeholder="请输入密码" bindinput="accountPw" value="{{accountPw}}"></input>
+  </modal>
   <text class='surnames'>徐/叶/董~</text>
   
 </view>

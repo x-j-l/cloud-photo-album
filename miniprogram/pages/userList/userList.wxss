@@ -16,3 +16,17 @@
   position: absolute;
   right: 0;
 }
+.classify_not{
+  margin: auto;
+}
+.get_userinfo{
+  justify-content: center;
+}
+.userinfo_image{
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+}
+.userinfo_name{
+  margin: 20rpx;
+}

@@ -10,9 +10,10 @@
 	},
 	"appid": "wxa3a41961abb4f90c",
 	"projectname": "cloud-photo-album",
-	"libVersion": "2.7.1",
+	"libVersion": "2.7.4",
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
+	"cloudfunctionTemplateRoot": "cloudfunctionTemplate",
 	"condition": {
 		"search": {
 			"current": -1,

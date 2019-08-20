@@ -9,10 +9,13 @@
   text-align: center;
   margin-bottom: .5rem;
 }
-.uploadImage{
+.uploadImage,.sortTime{
   margin: .5rem 0;
-  background: #23a0ff;
+  background: #07c160;
   color: #fff;
+}
+.sortTime{
+  background: #23a0ff;
 }
 .downloadImage{
   text-align: center;

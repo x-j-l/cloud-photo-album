@@ -9,6 +9,9 @@ Page({
     takeSession: false,
     requestResult: '',
     fileIdList: [],
+    hiddenModal: true,
+    accountName: '',
+    accountPw: '',
     username: '',
     password: ''
   },
@@ -187,6 +190,7 @@ Page({
 
   //提交表单
   admin_submit () {
+    let that = this
     let username = this.data.username
     let password = this.data.password
     const db = wx.cloud.database()
@@ -202,8 +206,8 @@ Page({
       configName: username,
       configPw: password
     }).get({
-      success (res) {
-        if (res.data.length == 0) {
+      success (result) {
+        if (result.data.length == 0) {
           wx.showModal({
             title: '提示',
             content: '用户名或密码输入不正确',
@@ -218,8 +222,27 @@ Page({
             key: 'password',
             data: password
           })
+          // wx.getSetting({
+          //   success(res) {
+          //     if (!res.authSetting['scope.userInfo']) {
+          //       wx.authorize({
+          //         scope: 'scope.userInfo',
+          //         success(re) {
+          //           console.log(re)
+          //          },
+          //         fail(er) {
+          //           console.log(er)
+          //         }
+          //       })
+          //     } else {
+          //       wx.redirectTo({
+          //         url: '../userList/userList?currentAccountOpt=' + JSON.stringify(result.data[0]),
+          //       })
+          //     }
+          //   }
+          // })
           wx.redirectTo({
-            url: '../userList/userList?currentAccountOpt=' + JSON.stringify(res.data[0]),
+            url: '../userList/userList?currentAccountOpt=' + JSON.stringify(result.data[0]),
           })
         }
       },
@@ -230,7 +253,7 @@ Page({
   },
 
   // 访客提交表单
-  visitor_submit() {
+  visitor_submit () {
     wx.setStorage({
       key: 'username',
       data: ''
@@ -240,9 +263,107 @@ Page({
       data: '123456'
     })
     const db = wx.cloud.database()
-    db.collection('x-j-l').doc('account_visitor1').get().then(res => {
+    db.collection('x-j-l').doc('account_visitor1').get().then(result => {
+      // wx.getSetting({
+      //   success(res) {
+      //     if (!res.authSetting['scope.userInfo']) {
+      //       wx.authorize({
+      //         scope: 'scope.userInfo',
+      //         success (re) {
+      //           console.log(re)
+      //         },
+      //         fail (er) {
+      //           console.log(er)
+      //         }
+      //       })
+      //     } else {
+      //       wx.redirectTo({
+      //         url: '../userList/userList?currentAccountOpt=' + JSON.stringify(result.data),
+      //       })
+      //     }
+      //   }
+      // })
       wx.redirectTo({
-        url: '../userList/userList?currentAccountOpt=' + JSON.stringify(res.data),
+        url: '../userList/userList?currentAccountOpt=' + JSON.stringify(result.data),
+      })
+    }).catch(err => {
+      console.log(err)
+    })
+  },
+
+  // 打开小程序设置页面
+  openSetting () {
+    wx.openSetting({
+      success(re) {
+        console.log(re)
+      },
+      fail(er) {
+        console.log(er)
+      }
+    })
+  },
+
+  // 注册账户
+  visitor_register () {
+    this.setData({
+      hiddenModal: false
+    })
+  },
+
+  // 获取注册用户名
+  accountName(e) {
+    this.setData({
+      accountName: e.detail.value
+    })
+  },
+
+  // 获取注册密码
+  accountPw(e) {
+    this.setData({
+      accountPw: e.detail.value
+    })
+  },
+
+  // 取消注册
+  cancelAccount () {
+    this.setData({
+      hiddenModal: true,
+      accountName: '',
+      accountPw: ''
+    })
+  },
+
+  // 确认注册
+  confirmAccount () {
+    if (this.data.accountName === '' || this.data.accountPw === '') {
+      wx.showToast({
+        title: '用户名或密码不能为空',
+        icon: 'none',
+        duration: 1500
+      })
+      return
+    }
+    let that = this
+    let timestamp = String(new Date().getTime())
+    const db = wx.cloud.database()
+    db.collection('x-j-l').add({
+      data: {
+        _id: 'account_' + timestamp,
+        configName: that.data.accountName,
+        configPw: that.data.accountPw,
+        deleteOp: '1',
+        recodeList: []
+      }
+    }).then(res => {
+      this.setData({
+        hiddenModal: true,
+        accountName: '',
+        accountPw: ''
+      })
+      wx.showToast({
+        title: '注册成功，请进行登录',
+        icon: 'none',
+        duration: 1500
       })
     }).catch(err => {
       console.log(err)
@@ -250,3 +371,4 @@ Page({
   }
 
 })
+

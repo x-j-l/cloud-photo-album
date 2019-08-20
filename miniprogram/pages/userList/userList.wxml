@@ -3,11 +3,18 @@
 <view class="container">
 
   <view class="list">
-     <view class="list-item" wx:for="{{recodeListOpt}}" wx:for-item="item" wx:for-index="index">
-      <navigator url="../FileList/FileList?id={{item._id}}&deleteOp={{deleteOp}}" open-type="navigate" class="uploader-text">
+    <!-- <view class="list-item get_userinfo">
+      <image src="{{getUserInfo.avatarUrl}}" class="userinfo_image"></image>
+      <text class="userinfo_name">{{getUserInfo.nickName}}</text>
+    </view> -->
+    <view class="list-item" wx:for="{{recodeListOpt}}" wx:for-item="item" wx:for-index="index">
+      <navigator url="../FileList/FileList?id={{item._id}}&showUploadInfo={{showUploadInfo}}" open-type="navigate" class="uploader-text">
         <text>{{item.name}}</text>
       </navigator>
       <text class="deleteCurrent" bindtap="deleteCurrent" wx:if='{{deleteOp}}' data-id="{{item._id}}">删除</text>
+    </view>
+    <view class="list-item" wx:if="{{recodeListOpt.length < 1}}">
+      <text class="classify_not">暂未添加相册分类，请添加</text>
     </view>
 
   </view>
